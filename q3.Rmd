@@ -17,7 +17,7 @@ In this question, we are going to learn how to create a sql database on google c
 - Choose a password for the server, I suggest using the generated password. (And keep it somewhere else)
 - It may take 5-10 minutes to create the server instance. Copy the public ip address once it is done.
 - Then open the instance and go the [Databases] tab; create a new database, call it "demo".
-- Then go to [Connections], click [Add network] and type "0.0.0.0/0" in Network and save. It will make sure that your server is visible to the internet.
+- Then go to [Connections], click [Add network], type "0.0.0.0/0" in Network", click [Done] and save. It will make sure that your server is visible to the internet.
 
 
 Of course you don't want to put the password in your assignment.
@@ -55,18 +55,19 @@ Then we import the January part of `nycflights13::flights` to the database.
 
 ```{r}
 # to save time, we only import January data
-mydb %>% dbWriteTable(
+if (!("flights" %in% dbListTables(mydb))) {
+  mydb %>% dbWriteTable(
   "flights",
   nycflights13::flights %>% filter(month == 1)
-)
+  )
+}
+
 ```
 
-##### (a) Count the number of rows of the table `flights`.
-
+##### (a) Use SQL to count the number of rows of the table `flights`.
 
 
 ##### (b) Use SQL to count the number of flights by destinations in January.
-
 
 
 ##### (c) Use SQL to count the average air time by carrier in January.
