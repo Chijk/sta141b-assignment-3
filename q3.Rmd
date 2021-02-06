@@ -29,7 +29,7 @@ Put down your password in the file, (replace XXXXXXXXXXXXXXXXXX with your passwo
 ```
 DATABASEPW=XXXXXXXXXXXXXXXXXX
 ```
-One your are done, run the following line
+Once you are done, run the following line
 ```{r, eval = FALSE}
 readRenviron(".Renviron")
 ```
