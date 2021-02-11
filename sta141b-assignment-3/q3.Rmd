@@ -1,0 +1,98 @@
+---
+title: "Question 3"
+---
+
+```{r, message = FALSE}
+library(DBI)
+library(tidyverse)
+library(usethis)
+```
+
+
+In this question, we are going to learn how to create a sql database on google cloud platform.
+
+- First, go to canvas and click the Google Cloud Student Coupon Retrieval Link. You will be given $50 dollars to use any google cloud services. Please be careful with the email account you have logged in when you redeem the coupon. You may use either your ucd email (recommended) or a personal email. You may receive two emails, one for confirmation, another for redeeming the coupon. 
+- Then, go to https://console.cloud.google.com/ and create a new project by clicking on the [Select a project] button.
+- In the SQL tab, choose PostgreSQL and create an new instance.
+- Click on "Show configuration options". In "Machine types and storage", drag the slidebar to the leftmost to choose "1 shared vCPU" and memory 0.6G. (It is the cheapest option for testing purpose) 
+- Choose a password for the server, I suggest using the generated password. (And keep it somewhere else)
+- It may take 5-10 minutes to create the server instance. Copy the public ip address once it is done.
+- Then open the instance and go the [Databases] tab; create a new database, call it "demo".
+- Then go to [Connections], click [Add network], type "0.0.0.0/0" in Network", click [Done] and save. It will make sure that your server is visible to the internet.
+
+
+Of course you don't want to put the password in your assignment.
+Password should be stored in a file `.Renviron`. The file could be created by using the following command.
+```{r, eval = FALSE}
+usethis::edit_r_environ("project")
+```
+Put down your password in the file, (replace XXXXXXXXXXXXXXXXXX with your password)
+```
+```
+Once you are done, run the following line
+```{r, eval = FALSE}
+readRenviron(".Renviron")
+```
+Then your password could be retrived by `Sys.getenv("DATABASEPW")`.
+
+The `.Renviron` won't be pushed to the git repo because the file was specified in `.gitignore`.
+
+
+##### Connect to the database
+
+You might need to DISCONNECT from UCD VPN if you are connected to it.
+
+```{r}
+host <- "35.236.23.65"  # replace it with your server ip
+mydb <- dbConnect(
+  RPostgres::Postgres(),
+  dbname = "demo",
+  user = "postgres", password = 'Cjk990313', host = host
+)
+```
+
+Then we import the January part of `nycflights13::flights` to the database.
+
+```{r}
+# to save time, we only import January data
+if (!("flights" %in% dbListTables(mydb))) {
+  mydb %>% dbWriteTable(
+  "flights",
+  nycflights13::flights %>% filter(month == 1)
+  )
+}
+
+```
+
+##### (a) Use SQL to count the number of rows of the table `flights`.
+
+
+```{sql connection=mydb}
+
+SELECT COUNT(*) FROM "flights"
+
+```
+
+
+
+##### (b) Use SQL to count the number of flights by destinations in January.
+
+
+
+
+```{sql connection=mydb}
+
+SELECT "dest",count(*) FROM "flights" GROUP BY "dest" 
+
+```
+
+
+##### (c) Use SQL to count the average air time by carrier in January.
+
+
+
+```{sql connection=mydb}
+SELECT "carrier", AVG(air_time) FROM "flights" GROUP BY "carrier"
+```
+
+

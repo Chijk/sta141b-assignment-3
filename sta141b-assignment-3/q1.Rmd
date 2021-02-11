@@ -1,0 +1,166 @@
+---
+title: "Question 1"
+---
+
+We use the Northwind database (file northwind.sqlite) in the question. It provides you with a good database structure and sales data.
+
+See https://www.zentut.com/sql-tutorial/sql-sample-database/ for a diagram.
+
+
+Database tables
+The following explains each table in the Northwind database:
+
+- Customers – stores customer master data
+- Orders – stores transaction sale orders from customers
+- OrderDetails – stores line items of sale orders
+- Products – stores products master data
+- Suppliers – stores suppliers master data
+- Shippers – stores shippers master data
+- Region – stores region master data
+- Territories – store territories master data
+- Employees – store employees master data
+- EmployeeTerritories – store relationship between employee and territory.
+
+
+Use SQL queries to answer the following questions.
+
+
+
+##### (a) Write a query to get Product name and quantity/unit.
+
+```{r}
+library(tidyverse)
+library(DBI)
+library(RSQLite)
+library(dplyr)
+Nwsql<- dbConnect(RSQLite::SQLite(),dbname='northwind.sqlite')
+Nwsql %>% dbListTables()
+```
+
+
+```{sql connection=Nwsql}
+SELECT "ProductName", "QuantityPerUnit" FROM "Product"
+```
+
+
+
+##### (b) Write a query to get discontinued Product list (Product ID and name). 
+
+```{r}
+Discontinued <- 
+  Nwsql %>%
+  tbl("Product")%>%
+  filter(Discontinued==1)%>%
+  select(ProductName, Id)%>%
+  collect()
+
+Discontinued
+```
+
+```{sql connection=Nwsql}
+
+SELECT ProductName, Id FROM 'Product'WHERE Discontinued = 1
+
+
+```
+
+
+
+##### (c) Write a query to get Product list (id, name, unit price) where current products cost less than $20.
+
+```{r}
+q1c <- 
+  Nwsql%>%
+  tbl("Product")%>%
+  filter(UnitPrice < 20)%>%
+  select(ProductName, Id,UnitPrice)%>%
+  collect()
+q1c 
+```
+
+```{sql connection=Nwsql}
+
+SELECT ProductName, Id,UnitPrice FROM 'Product'WHERE UnitPrice < 20
+
+```
+
+
+##### (d) Write a query to count current and discontinued products.
+
+
+```{r}
+q1d <- 
+  Nwsql%>%
+  tbl("Product")%>%
+  count(Discontinued==1)
+ q1d
+```
+8 prodcuted is discountinued 69 products are not
+
+```{sql connection=Nwsql}
+
+SELECT COUNT(Id) FROM 'Product' WHERE Discontinued=1;
+```
+```{sql connection=Nwsql}
+SELECT COUNT(Id) FROM 'Product' WHERE Discontinued=0;
+```
+
+
+##### (e) Write a query to get most expense and least expensive Product list (name and unit price).
+
+```{r}
+q1ea <- 
+  Nwsql%>%
+  tbl("Product")%>%
+  filter(UnitPrice == max(UnitPrice))%>%
+  select(ProductName,,UnitPrice)%>%
+  collect()
+
+q1ei <- 
+  Nwsql%>%
+  tbl("Product")%>%
+  filter(UnitPrice == min(UnitPrice))%>%
+  select(ProductName,,UnitPrice)%>%
+  collect()
+
+q1e=full_join(q1ea, q1ei,by = c("ProductName", "UnitPrice"))
+
+q1e
+  
+```
+```{sql connection=Nwsql}
+
+
+SELECT ProductName,UnitPrice FROM 'Product'ORDER BY UnitPrice DESC LIMIT 1;
+```
+
+```{sql connection=Nwsql}
+SELECT ProductName,UnitPrice FROM 'Product'ORDER BY UnitPrice ASC LIMIT 1;
+```
+
+
+
+##### (f) Write a query to get Product list (name, unit price) of above average price
+
+
+```{r}
+q1f <- 
+  Nwsql%>%
+  tbl("Product")%>%
+  filter(UnitPrice >= mean(UnitPrice))%>%
+  select(ProductName,,UnitPrice)%>%
+  collect()
+q1f
+```
+```{sql connection=Nwsql}
+
+SELECT ProductName,UnitPrice FROM 'Product' 
+GROUP BY ProductName
+HAVING UnitPrice > ( SELECT AVG (UnitPrice) FROM Product )
+
+
+
+
+```
+
+
